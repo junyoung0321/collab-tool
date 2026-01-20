@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/collab_tool?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: fpdlswjtm12#
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  secret: v3ryS3cr3tK3yF0rJwTS1gn1ngMustB3L0ng3rTh4nTh1s # ??? ? ???
