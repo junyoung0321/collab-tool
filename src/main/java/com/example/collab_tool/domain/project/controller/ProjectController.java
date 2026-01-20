@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.security.Principal;
 
 @RestController
@@ -29,5 +29,11 @@ public class ProjectController {
         ProjectResponse response = projectService.createProject(principal.getName(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProjectResponse>> getMyProjects(Principal principal) {
+        List<ProjectResponse> responses = projectService.getMyProjects(principal.getName());
+        return ResponseEntity.ok(responses);
     }
 }
