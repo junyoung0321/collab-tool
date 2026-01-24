@@ -17,8 +17,11 @@ public class TaskResponse {
         this.status = task.getStatus();
 
         // 담당자가 있으면 이름 넣기
+        //없으면 미정으로
         if (task.getAssignee() != null) {
             this.assigneeName = task.getAssignee().getName();
+        } else {
+            this.assigneeName = "미정";
         }
     }
 
