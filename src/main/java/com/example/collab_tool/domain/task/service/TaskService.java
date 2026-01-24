@@ -8,6 +8,8 @@ import com.example.collab_tool.domain.task.entity.Task;
 import com.example.collab_tool.domain.task.repository.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -35,5 +37,38 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task); //저장, 반환
         return new TaskResponse(savedTask);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getTasks(Long projectId) {
+        return taskRepository.findByProjectId(projectId).stream()
+                .map(TaskResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TaskResponse updateTask(Long taskId, String email, TaskRequest request, String status) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("할 일이 없습니다."));
+
+        if (!task.getProject().getOwner().getEmail().equals(email)) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
+        task.update(request.getTitle(), request.getContent(), status);
+
+        return new TaskResponse(task);
+    }
+
+    @Transactional
+    public void deleteTask(Long taskId, String email) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("할 일이 없습니다."));
+
+        if (!task.getProject().getOwner().getEmail().equals(email)) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
+        taskRepository.delete(task);
     }
 }

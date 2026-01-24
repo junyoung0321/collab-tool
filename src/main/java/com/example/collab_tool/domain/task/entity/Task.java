@@ -56,4 +56,10 @@ public class Task extends BaseTimeEntity {
     public void updateStatus(String status) {
         this.status = status;
     }
+
+    public void update(String title, String content, String status) {
+        this.title = title;
+        this.content = content;
+        this.status = status;
+    }
 }
