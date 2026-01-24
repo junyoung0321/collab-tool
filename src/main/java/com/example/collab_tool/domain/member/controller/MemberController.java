@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.collab_tool.domain.member.dto.LoginRequest;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,9 +28,21 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginRequest request) {
-        String token = memberService.login(request);
+    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletRequest httpRequest) {
 
-        return ResponseEntity.ok(Map.of("token", token)); // JSON 형태로 반환
+        memberService.login(request.getEmail(), request.getPassword());
+        HttpSession session = httpRequest.getSession();
+        session.setAttribute("LOGIN_USER", request.getEmail());
+
+        return ResponseEntity.ok("로그인 성공! (세션 생성됨)");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 }

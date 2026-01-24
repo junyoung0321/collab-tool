@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.security.Principal;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -23,11 +24,14 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
             @RequestBody @Valid ProjectCreateRequest request,
-            Principal principal // 토큰에서 이메일을 꺼냄
+            @SessionAttribute(name = "LOGIN_USER", required = false) String email
     ) {
-        // principal.getName()에는 이메일이 들어있음
-        ProjectResponse response = projectService.createProject(principal.getName(), request);
 
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ProjectResponse response = projectService.createProject(email, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
