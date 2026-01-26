@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import com.example.collab_tool.domain.project.dto.InviteRequest;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -36,8 +37,27 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> getMyProjects(Principal principal) {
-        List<ProjectResponse> responses = projectService.getMyProjects(principal.getName());
+    public ResponseEntity<List<ProjectResponse>> getProjects(
+            @SessionAttribute(name = "LOGIN_USER", required = false) String email
+    ) {
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<ProjectResponse> responses = projectService.getProjects(email);
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/{projectId}/invite")
+    public ResponseEntity<String> inviteMember(
+            @PathVariable Long projectId,
+            @RequestBody @Valid InviteRequest request,
+            @SessionAttribute(name = "LOGIN_USER", required = false) String email
+    ) {
+        if (email == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        projectService.inviteMember(projectId, email, request.getEmail());
+
+        return ResponseEntity.ok("멤버 초대가 완료되었습니다.");
     }
 }

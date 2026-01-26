@@ -1,6 +1,9 @@
 package com.example.collab_tool.domain.task.service;
 
+import com.example.collab_tool.domain.member.entity.Member;
+import com.example.collab_tool.domain.member.repository.MemberRepository;
 import com.example.collab_tool.domain.project.entity.Project;
+import com.example.collab_tool.domain.project.repository.ProjectMemberRepository;
 import com.example.collab_tool.domain.project.repository.ProjectRepository;
 import com.example.collab_tool.domain.task.dto.TaskRequest;
 import com.example.collab_tool.domain.task.dto.TaskResponse;
@@ -16,27 +19,32 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
+    private final MemberRepository memberRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
-    public TaskService(TaskRepository taskRepository, ProjectRepository projectRepository) {
+    public TaskService(TaskRepository taskRepository,
+                       ProjectRepository projectRepository,
+                       MemberRepository memberRepository,
+                       ProjectMemberRepository projectMemberRepository) {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
+        this.memberRepository = memberRepository;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     @Transactional
     public TaskResponse createTask(Long projectId, String email, TaskRequest request) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트 없음"));
 
-        // 권한 확인 예외 처리
-        if (!project.getOwner().getEmail().equals(email)) {
-            throw new IllegalArgumentException("이 프로젝트에 대한 권한이 없습니다.");
-        }
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
 
-        // 할 일 생성
-        Task task = new Task(request.getTitle(), request.getContent(), "TODO", project, null);
+        //권한 체크
+        validatePermission(project, member);
 
-        Task savedTask = taskRepository.save(task); //저장, 반환
-        return new TaskResponse(savedTask);
+        Task task = new Task(request.getTitle(), request.getContent(), "TODO", project, null); // 담당자는 null
+        return new TaskResponse(taskRepository.save(task));
     }
 
     @Transactional(readOnly = true)
@@ -51,12 +59,12 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("할 일이 없습니다."));
 
-        if (!task.getProject().getOwner().getEmail().equals(email)) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+
+        validatePermission(task.getProject(), member);
 
         task.update(request.getTitle(), request.getContent(), status);
-
         return new TaskResponse(task);
     }
 
@@ -65,10 +73,22 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("할 일이 없습니다."));
 
-        if (!task.getProject().getOwner().getEmail().equals(email)) {
-            throw new IllegalArgumentException("권한이 없습니다.");
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
+
+        validatePermission(task.getProject(), member);
+        taskRepository.delete(task);
+    }
+
+    private void validatePermission(Project project, Member member) {
+        if (project.getOwner().getId().equals(member.getId())) {
+            return;
         }
 
-        taskRepository.delete(task);
+        if (projectMemberRepository.existsByProjectAndMember(project, member)) {
+            return;
+        }
+
+        throw new IllegalArgumentException("프로젝트 멤버만 접근할 수 있습니다.");
     }
 }
