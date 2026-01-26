@@ -39,7 +39,7 @@ public class TaskController {
         return ResponseEntity.ok(responses);
     }
 
-    @PatchMapping("/tasks/{taskId}") // 경로 주의! /projects/... 아님
+    @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<TaskResponse> updateTask(
             @PathVariable Long taskId,
             @RequestBody @Valid TaskRequest request,

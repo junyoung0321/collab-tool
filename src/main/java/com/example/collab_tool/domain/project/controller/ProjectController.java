@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.security.Principal;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import com.example.collab_tool.domain.project.dto.InviteRequest;
+import com.example.collab_tool.domain.member.dto.MemberResponse;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -59,5 +59,11 @@ public class ProjectController {
         projectService.inviteMember(projectId, email, request.getEmail());
 
         return ResponseEntity.ok("멤버 초대가 완료되었습니다.");
+    }
+
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<List<MemberResponse>> getProjectMembers(@PathVariable Long projectId) {
+        List<MemberResponse> members = projectService.getProjectMembers(projectId);
+        return ResponseEntity.ok(members);
     }
 }

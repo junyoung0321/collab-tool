@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import com.example.collab_tool.domain.project.entity.ProjectMember;
 import com.example.collab_tool.domain.project.entity.ProjectMemberRole;
 import com.example.collab_tool.domain.project.repository.ProjectMemberRepository;
+import com.example.collab_tool.domain.member.dto.MemberResponse;
 
 @Service
 public class ProjectService {
@@ -82,5 +83,17 @@ public class ProjectService {
 
         ProjectMember newMember = new ProjectMember(project, invitee, ProjectMemberRole.MEMBER);
         projectMemberRepository.save(newMember);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberResponse> getProjectMembers(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트가 존재하지 않습니다."));
+
+        List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(projectId);
+
+        return projectMembers.stream()
+                .map(pm -> new MemberResponse(pm.getMember()))
+                .collect(Collectors.toList());
     }
 }
