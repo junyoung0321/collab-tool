@@ -6,7 +6,7 @@ import com.example.collab_tool.domain.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.collab_tool.domain.member.dto.LoginRequest;
+
 
 @Service
 public class MemberService {

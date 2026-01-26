@@ -26,7 +26,7 @@ public class TaskController {
             @SessionAttribute(name = "LOGIN_USER", required = false) String email
     ) {
         if (email == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 권한 없음
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         TaskResponse response = taskService.createTask(projectId, email, request);
 

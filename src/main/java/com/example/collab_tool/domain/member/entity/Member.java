@@ -1,6 +1,6 @@
 package com.example.collab_tool.domain.member.entity;
 
-import com.example.collab_tool.domain.project.entity.Project; // Project import 필요
+import com.example.collab_tool.domain.project.entity.Project;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

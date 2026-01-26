@@ -21,8 +21,8 @@ public class Project extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 (성능 최적화 필수)
-    @JoinColumn(name = "owner_id", nullable = false) // 외래키 이름
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
     private Member owner;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
